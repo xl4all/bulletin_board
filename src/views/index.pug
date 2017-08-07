@@ -1,0 +1,12 @@
+doctype html
+html
+	head
+		title
+	body
+		a(href="#postedmessages") posted messages
+		h1 Pug - Add Message
+		form(action='/addmessage', method='post')
+			input(type='text', name='title' placeholder= 'enter title message' autocomplete="off" required)
+			input(type='text', name='body' placeholder='enter message' required)
+			input(type='submit', value='submit message')
+

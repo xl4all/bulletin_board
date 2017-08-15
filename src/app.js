@@ -17,6 +17,15 @@ var app = express();
 var bodyParser = require('body-parser');
 var pg = require('pg');
 
+//Database
+const client = new pg.Client({
+  database: 'bulletinboard',
+  host: 'localhost',
+  user: 'postgres',
+  password: 'postgres',
+})
+client.connect()//we maken verbinding met de database
+
 //setting
 app.use(express.static('./public'));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,18 +33,46 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', './views');
 app.set('view engine', 'pug');
 
+app.get('/',function(req,res){
 
-app.get('/writeMessage',function(req,res){
-	response.render('index');
+	res.render('index')
 });
-	var requestParameters = req.query;
 
-app.post('/samplePostRequest', function (request, response) {
-	console.log("post request received");
-	console.log(request.body);
-
-	response.send('data received: ' + JSON.stringify(request.body) + '\n');
+app.get('/postedMessages',function(req,res){
+	// var readMessages = select title from messages
+	// var readBody = select body from messages
+	client.query('select * from messages;', (err, result) =>{
+		//console.log(result.rows)
+		if(err) {
+			throw err;
+		}
+		res.render('postedmessages',{messages:result.rows}); //result.rows is info die je meestuurt met de pugfile
+	});
 });
+	
+app.post('/addmessage', function (req, res){
+	var messageTitle = req.body.title;  
+	var messageBody = req.body.body;
+	// console.log(messageTitle)
+	// console.log(messageBody);
+	client.query(`insert into messages(title, body) values ('${messageTitle}','${messageBody}')`, function (err, result) {
+		if(err) {
+			throw err;
+		}
+
+		res.redirect('/postedMessages');
+
+														
+
+	// ,{searcheduser:matchedUser}
+
+		// console.log("post request received");
+		// console.log(req.body);
+
+	});
+});
+
+
 
 app.listen(3000, function(){
 	console.log('Working out of port 3000!')
